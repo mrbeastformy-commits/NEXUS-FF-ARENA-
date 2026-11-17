@@ -185,6 +185,8 @@ export function AuthScreen() {
                     <UserPlus className="w-4 h-4" />
                     <span>Create Player Account</span>
                   </button>
+
+                  <PWAInstallButton fullWidth />
                 </div>
 
                 {errorMsg && (

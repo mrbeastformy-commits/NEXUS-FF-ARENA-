@@ -13,13 +13,7 @@ export default defineConfig(() => {
       VitePWA({
         registerType: 'autoUpdate',
         manifestFilename: 'manifest.webmanifest',
-        includeAssets: [
-          'icon.png',
-          'apple-touch-icon.png',
-          'pwa-192x192.png',
-          'pwa-512x512.png',
-          'pwa-maskable-512x512.png',
-        ],
+        includeAssets: ['admin-manifest.webmanifest'],
         manifest: {
           id: '/',
           name: 'NEXUS FF ARENA',
@@ -28,6 +22,7 @@ export default defineConfig(() => {
           theme_color: '#06070A',
           background_color: '#06070A',
           display: 'standalone',
+          orientation: 'portrait',
           start_url: '/',
           scope: '/',
           icons: [
@@ -53,14 +48,80 @@ export default defineConfig(() => {
         },
         workbox: {
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
-          globIgnores: ['icon.png', 'assets/**', 'video/**', 'audio/**'],
+          globIgnores: ['video/**', 'audio/**', 'sw-offline.js'],
+          maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+          importScripts: ['/sw-offline.js'],
           navigateFallbackDenylist: [/^\/admin/, /^\/api/, /^\/video/, /^\/audio/],
+          runtimeCaching: [
+            // Never cache sensitive endpoints (wallet, room credentials, admin actions)
+            {
+              urlPattern: /^\/api\/.*/i,
+              handler: 'NetworkOnly',
+            },
+            // Never cache live Firestore documents (wallet balances, room creds, payment screenshots)
+            {
+              urlPattern: /^https:\/\/(firestore|firebase|identitytoolkit|securetoken|firebaseinstallations)\.googleapis\.com\/.*/i,
+              handler: 'NetworkOnly',
+            },
+            {
+              urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'google-fonts-cache',
+                expiration: {
+                  maxEntries: 10,
+                  maxAgeSeconds: 60 * 60 * 24 * 365,
+                },
+                cacheableResponse: {
+                  statuses: [0, 200],
+                },
+              },
+            },
+            {
+              urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'gstatic-fonts-cache',
+                expiration: {
+                  maxEntries: 10,
+                  maxAgeSeconds: 60 * 60 * 24 * 365,
+                },
+                cacheableResponse: {
+                  statuses: [0, 200],
+                },
+              },
+            },
+          ],
         },
         devOptions: {
           enabled: true,
           type: 'module',
         },
       }),
+      {
+        name: 'admin-manifest-cleanup',
+        enforce: 'post',
+        transformIndexHtml: {
+          order: 'post',
+          handler(html, ctx) {
+            const target = ctx.filename || ctx.path || '';
+            if (target.endsWith('admin.html') || target.startsWith('/admin')) {
+              return html.replace(/<link rel="manifest" href="\/manifest\.webmanifest"\s*\/?>/g, '');
+            }
+            return html;
+          },
+        },
+        closeBundle() {
+          const distAdmin = path.resolve(__dirname, 'dist/admin.html');
+          if (fs.existsSync(distAdmin)) {
+            const raw = fs.readFileSync(distAdmin, 'utf-8');
+            const cleaned = raw.replace(/<link rel="manifest" href="\/manifest\.webmanifest"\s*\/?>/g, '');
+            if (cleaned !== raw) {
+              fs.writeFileSync(distAdmin, cleaned, 'utf-8');
+            }
+          }
+        },
+      },
       // Copies src/assets into dist/ so root-relative URLs like
       // "/src/assets/images/..." (e.g. generate_image output) still resolve
       // in production builds. Do not remove.

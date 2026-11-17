@@ -28,6 +28,8 @@ import { AuthProvider, useAuth } from '../shared/AuthContext';
 import { ErrorBoundary } from '../shared/ErrorBoundary';
 import { NexusLogo } from '../shared/NexusLogo';
 import { NexusSplashScreen } from '../shared/NexusSplashScreen';
+import { OfflineIndicator, OfflineScreen, useOnlineStatus } from '../shared/OfflineBanner';
+import { PWAInstallButton } from '../shared/PWAInstallButton';
 import {
   AdminBannersView,
   AdminResultsView,
@@ -218,6 +220,7 @@ function AdminLoginGate() {
 
 function AdminShell() {
   const { firebaseUser, role, permissions, authReady, roleVerified, logout } = useAuth();
+  const isOnline = useOnlineStatus();
   const [showSplash, setShowSplash] = useState(true);
   const [activeNav, setActiveNav] = useState<AdminNavId>('overview');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -253,6 +256,9 @@ function AdminShell() {
     }
 
     if (!firebaseUser) {
+      if (!isOnline) {
+        return <OfflineScreen variant="admin" />;
+      }
       return <AdminLoginGate />;
     }
 
@@ -349,7 +355,12 @@ function AdminShell() {
               NEXUS FF ADMIN / <strong className="text-white capitalize">{activeNav}</strong>
             </span>
           </div>
-          <span className="text-xs font-mono font-bold text-[#F5C451] uppercase">{role}</span>
+          <div className="flex items-center gap-3">
+            {isOwner && (
+              <PWAInstallButton appName="NEXUS FF ADMIN" variant="admin" compact />
+            )}
+            <span className="text-xs font-mono font-bold text-[#F5C451] uppercase">{role}</span>
+          </div>
         </header>
 
         <main className="flex-1 p-4 sm:p-6 max-w-6xl w-full mx-auto">
@@ -402,13 +413,19 @@ function AdminShell() {
                 );
               })}
             </nav>
-            <a href="/" className="min-h-[40px] px-3 rounded-lg bg-white/5 text-xs text-white flex items-center justify-center">
-              Open Player App
-            </a>
+            <div className="space-y-2 pt-2 border-t border-white/10">
+              {isOwner && (
+                <PWAInstallButton appName="NEXUS FF ADMIN" variant="admin" fullWidth />
+              )}
+              <a href="/" className="min-h-[40px] px-3 rounded-lg bg-white/5 text-xs text-white flex items-center justify-center">
+                Open Player App
+              </a>
+            </div>
           </aside>
           <div className="flex-1" onClick={() => setMobileMenuOpen(false)} />
         </div>
       )}
+      <OfflineIndicator />
       </div>
     );
   };

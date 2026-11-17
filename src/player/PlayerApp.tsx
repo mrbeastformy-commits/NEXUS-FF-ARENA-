@@ -8,6 +8,7 @@ import { AudioControllerBar } from '../shared/AudioControllerBar';
 import { ErrorBoundary } from '../shared/ErrorBoundary';
 import { NexusLogo } from '../shared/NexusLogo';
 import { NexusSplashScreen } from '../shared/NexusSplashScreen';
+import { OfflineIndicator, OfflineScreen, useOnlineStatus } from '../shared/OfflineBanner';
 import { PWAInstallButton } from '../shared/PWAInstallButton';
 import { AuthScreen } from './pages/AuthScreen';
 import { HomePage, type PlayerTab } from './pages/HomePage';
@@ -20,6 +21,7 @@ import { VideoCallOverlay } from './components/VideoCallOverlay';
 function ArenaShell() {
   const { firebaseUser, profile, authReady, roleVerified, emailVerified, refreshSession, logout } = useAuth();
   const { musicReady, startAfterLoading } = useMusicPlayer();
+  const isOnline = useOnlineStatus();
   const [showSplash, setShowSplash] = useState(true);
   const [activeTab, setActiveTab] = useState<PlayerTab>('home');
   const [subContext, setSubContext] = useState<string | undefined>(undefined);
@@ -56,6 +58,9 @@ function ArenaShell() {
     }
 
     if (!firebaseUser) {
+      if (!isOnline) {
+        return <OfflineScreen variant="arena" />;
+      }
       return <AuthScreen />;
     }
 
@@ -216,6 +221,7 @@ function ArenaShell() {
       </nav>
 
       <VideoCallOverlay />
+      <OfflineIndicator />
       </div>
     );
   };

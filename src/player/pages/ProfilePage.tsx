@@ -530,7 +530,7 @@ export function ProfilePage({ initialSection = 'profile' }: { initialSection?: s
             <AudioControllerBar />
           </div>
 
-          <PWAInstallButton />
+          <PWAInstallButton showSettingsCard />
 
           {/* Push Notifications */}
           <div className="rounded-xl bg-[#07090E] border border-white/10 p-4 flex items-center justify-between gap-3">
