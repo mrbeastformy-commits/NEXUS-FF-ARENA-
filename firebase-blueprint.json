@@ -1,0 +1,535 @@
+{
+  "entities": {
+    "UserPublicProfile": {
+      "title": "UserPublicProfile",
+      "description": "Public player profile with zero PII (no email or phone).",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "playerId": { "type": "string", "minLength": 4, "maxLength": 24, "pattern": "^[A-Z0-9\\-]+$" },
+        "ffUid": { "type": "string", "minLength": 0, "maxLength": 32 },
+        "inGameName": { "type": "string", "minLength": 2, "maxLength": 32 },
+        "country": { "type": "string", "minLength": 2, "maxLength": 64 },
+        "avatarUrl": { "type": "string", "minLength": 0, "maxLength": 1024 },
+        "avatarImageId": { "type": "string", "maxLength": 128 },
+        "balance": { "type": "number" },
+        "matches": { "type": "number" },
+        "wins": { "type": "number" },
+        "eliminations": { "type": "number" },
+        "mvpCount": { "type": "number" },
+        "arenaPoints": { "type": "number" },
+        "rank": { "type": "number" },
+        "isOnline": { "type": "boolean" },
+        "lastSeen": { "type": "string", "format": "date-time" },
+        "banStatus": { "type": "string", "enum": ["none", "suspended", "banned"] },
+        "chatRestricted": { "type": "boolean" },
+        "tournamentRestricted": { "type": "boolean" },
+        "banReason": { "type": "string", "maxLength": 500 },
+        "banExpiresAt": { "type": "string", "maxLength": 64 },
+        "fcmToken": { "type": "string", "maxLength": 512 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "playerId", "inGameName", "country", "balance", "matches", "wins", "eliminations", "mvpCount", "arenaPoints", "rank", "isOnline", "banStatus", "chatRestricted", "tournamentRestricted", "createdAt", "updatedAt"]
+    },
+    "UserPrivateInfo": {
+      "title": "UserPrivateInfo",
+      "description": "Isolated PII subcollection readable only by the user and owner.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "email": { "type": "string", "format": "email", "maxLength": 254 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "createdAt", "updatedAt"]
+    },
+    "AdminRecord": {
+      "title": "AdminRecord",
+      "description": "Owner role verification record.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "role": { "type": "string", "enum": ["owner"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "role", "createdAt"]
+    },
+    "ModeratorRecord": {
+      "title": "ModeratorRecord",
+      "description": "Moderator profile and granular permissions.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "playerId": { "type": "string", "minLength": 4, "maxLength": 24 },
+        "inGameName": { "type": "string", "minLength": 2, "maxLength": 32 },
+        "status": { "type": "string", "enum": ["active", "suspended", "removed"] },
+        "permissions": { "type": "object" },
+        "addedBy": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "playerId", "inGameName", "status", "permissions", "addedBy", "createdAt", "updatedAt"]
+    },
+    "Tournament": {
+      "title": "Tournament",
+      "description": "Competitive tournament event managed by staff.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "title": { "type": "string", "minLength": 3, "maxLength": 100 },
+        "category": { "type": "string", "enum": ["CS Ranked", "Battle Royale", "Clash Squad", "Lone Wolf", "1v1 Custom", "2v2 Custom", "Squad Custom", "Special Events"] },
+        "thumbnailUrl": { "type": "string", "maxLength": 1024 },
+        "thumbnailImageId": { "type": "string", "maxLength": 128 },
+        "coverUrl": { "type": "string", "maxLength": 1024 },
+        "coverImageId": { "type": "string", "maxLength": 128 },
+        "entryFee": { "type": "number" },
+        "prizePool": { "type": "number" },
+        "prizeDistribution": { "type": "string", "maxLength": 300 },
+        "registrationDeadline": { "type": "string", "maxLength": 64 },
+        "startTime": { "type": "string", "maxLength": 64 },
+        "maxPlayers": { "type": "number" },
+        "registeredCount": { "type": "number" },
+        "teamSize": { "type": "number" },
+        "status": { "type": "string", "enum": ["draft", "open", "closed", "live", "completed", "cancelled"] },
+        "rulesText": { "type": "string", "maxLength": 2000 },
+        "resultsAnnounced": { "type": "boolean" },
+        "winners": { "type": "array" },
+        "createdBy": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "title", "category", "entryFee", "prizePool", "registrationDeadline", "startTime", "maxPlayers", "registeredCount", "teamSize", "status", "resultsAnnounced", "createdBy", "createdAt", "updatedAt"]
+    },
+    "RoomCredential": {
+      "title": "RoomCredential",
+      "description": "Protected custom room ID and password accessible only to staff and paid registrants.",
+      "type": "object",
+      "properties": {
+        "tournamentId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "roomId": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "roomPassword": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "notes": { "type": "string", "maxLength": 500 },
+        "updatedBy": { "type": "string", "maxLength": 128 },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["tournamentId", "roomId", "roomPassword", "updatedBy", "updatedAt"]
+    },
+    "Registration": {
+      "title": "Registration",
+      "description": "Idempotent player tournament registration record.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 260, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "tournamentId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "playerId": { "type": "string", "minLength": 4, "maxLength": 24 },
+        "inGameName": { "type": "string", "minLength": 2, "maxLength": 32 },
+        "ffUid": { "type": "string", "maxLength": 32 },
+        "teamName": { "type": "string", "maxLength": 64 },
+        "entryFeePaid": { "type": "number" },
+        "idempotencyKey": { "type": "string", "minLength": 4, "maxLength": 128 },
+        "status": { "type": "string", "enum": ["confirmed", "cancelled"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "tournamentId", "uid", "playerId", "inGameName", "entryFeePaid", "idempotencyKey", "status", "createdAt"]
+    },
+    "Banner": {
+      "title": "Banner",
+      "description": "Admin-controlled home carousel banner.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "title": { "type": "string", "minLength": 2, "maxLength": 100 },
+        "subtitle": { "type": "string", "maxLength": 200 },
+        "imageUrl": { "type": "string", "maxLength": 1024 },
+        "imageId": { "type": "string", "maxLength": 128 },
+        "linkTournamentId": { "type": "string", "maxLength": 128 },
+        "order": { "type": "number" },
+        "active": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "title", "order", "active", "createdAt", "updatedAt"]
+    },
+    "WalletTransaction": {
+      "title": "WalletTransaction",
+      "description": "Immutable wallet coin ledger entry.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "playerId": { "type": "string", "maxLength": 24 },
+        "type": { "type": "string", "enum": ["deposit", "withdrawal", "tournament_entry", "tournament_prize", "manual_credit", "manual_debit", "reward"] },
+        "amount": { "type": "number" },
+        "balanceAfter": { "type": "number" },
+        "referenceId": { "type": "string", "maxLength": 128 },
+        "reason": { "type": "string", "maxLength": 300 },
+        "status": { "type": "string", "enum": ["completed", "pending", "rejected"] },
+        "createdBy": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "uid", "type", "amount", "balanceAfter", "reason", "status", "createdBy", "createdAt"]
+    },
+    "DepositRequest": {
+      "title": "DepositRequest",
+      "description": "EasyPaisa/JazzCash payment screenshot verification request.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "playerId": { "type": "string", "maxLength": 24 },
+        "inGameName": { "type": "string", "maxLength": 32 },
+        "amountPkr": { "type": "number" },
+        "coins": { "type": "number" },
+        "method": { "type": "string", "enum": ["EasyPaisa", "JazzCash"] },
+        "screenshotImageId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "screenshotUrl": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "rejectionReason": { "type": "string", "maxLength": 300 },
+        "reviewedBy": { "type": "string", "maxLength": 128 },
+        "reviewedAt": { "type": "string", "maxLength": 64 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "uid", "playerId", "inGameName", "amountPkr", "coins", "method", "status", "createdAt", "updatedAt"]
+    },
+    "WithdrawalRequest": {
+      "title": "WithdrawalRequest",
+      "description": "Player coin withdrawal request reviewed by owner.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "playerId": { "type": "string", "maxLength": 24 },
+        "inGameName": { "type": "string", "maxLength": 32 },
+        "coinsAmount": { "type": "number" },
+        "pkrAmount": { "type": "number" },
+        "method": { "type": "string", "enum": ["EasyPaisa", "JazzCash"] },
+        "accountNumber": { "type": "string", "minLength": 5, "maxLength": 32 },
+        "accountTitle": { "type": "string", "minLength": 2, "maxLength": 64 },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "rejectionReason": { "type": "string", "maxLength": 300 },
+        "reviewedBy": { "type": "string", "maxLength": 128 },
+        "reviewedAt": { "type": "string", "maxLength": 64 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "uid", "playerId", "inGameName", "coinsAmount", "pkrAmount", "method", "accountNumber", "accountTitle", "status", "createdAt", "updatedAt"]
+    },
+    "Friendship": {
+      "title": "Friendship",
+      "description": "Friend request, acceptance, or block relationship between two players.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 260, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "users": { "type": "array" },
+        "requesterUid": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "recipientUid": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "status": { "type": "string", "enum": ["pending", "accepted", "blocked"] },
+        "blockedBy": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "users", "requesterUid", "recipientUid", "status", "createdAt", "updatedAt"]
+    },
+    "ChatThread": {
+      "title": "ChatThread",
+      "description": "1-to-1 chat room metadata for Master Gate validation.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 260, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "participants": { "type": "array" },
+        "lastMessage": { "type": "string", "maxLength": 500 },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "participants", "updatedAt"]
+    },
+    "ChatMessage": {
+      "title": "ChatMessage",
+      "description": "Private 1-to-1 chat message between accepted friends.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "chatId": { "type": "string", "minLength": 1, "maxLength": 260 },
+        "participants": { "type": "array" },
+        "senderUid": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "recipientUid": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "type": { "type": "string", "enum": ["text", "image", "video"] },
+        "text": { "type": "string", "maxLength": 2000 },
+        "mediaImageId": { "type": "string", "maxLength": 128 },
+        "mediaUrl": { "type": "string", "maxLength": 1024 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "chatId", "senderUid", "recipientUid", "type", "createdAt"]
+    },
+    "Report": {
+      "title": "Report",
+      "description": "Player or chat abuse report reviewed by staff.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "reporterUid": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "reporterPlayerId": { "type": "string", "maxLength": 24 },
+        "targetUid": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "targetPlayerId": { "type": "string", "maxLength": 24 },
+        "category": { "type": "string", "enum": ["chat_abuse", "cheating", "scam", "harassment", "other"] },
+        "reason": { "type": "string", "minLength": 3, "maxLength": 1000 },
+        "chatId": { "type": "string", "maxLength": 260 },
+        "status": { "type": "string", "enum": ["open", "reviewing", "resolved", "dismissed"] },
+        "moderatorNotes": { "type": "string", "maxLength": 1000 },
+        "reviewedBy": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "reporterUid", "targetUid", "category", "reason", "status", "createdAt", "updatedAt"]
+    },
+    "BanRecord": {
+      "title": "BanRecord",
+      "description": "Immutable moderation/ban history entry.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "playerId": { "type": "string", "maxLength": 24 },
+        "type": { "type": "string", "enum": ["temporary_suspend", "permanent_ban", "chat_restrict", "tournament_restrict", "unban"] },
+        "reason": { "type": "string", "minLength": 3, "maxLength": 500 },
+        "durationHours": { "type": "number" },
+        "expiresAt": { "type": "string", "maxLength": 64 },
+        "issuedBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "issuedByRole": { "type": "string", "enum": ["owner", "moderator"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "uid", "type", "reason", "issuedBy", "issuedByRole", "createdAt"]
+    },
+    "LeaderboardEntry": {
+      "title": "LeaderboardEntry",
+      "description": "Verified match leaderboard entry written by admin/server.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "playerId": { "type": "string", "minLength": 4, "maxLength": 24 },
+        "inGameName": { "type": "string", "minLength": 2, "maxLength": 32 },
+        "avatarUrl": { "type": "string", "maxLength": 1024 },
+        "avatarImageId": { "type": "string", "maxLength": 128 },
+        "country": { "type": "string", "maxLength": 64 },
+        "wins": { "type": "number" },
+        "matches": { "type": "number" },
+        "mvpCount": { "type": "number" },
+        "eliminations": { "type": "number" },
+        "arenaPoints": { "type": "number" },
+        "weeklyPoints": { "type": "number" },
+        "monthlyPoints": { "type": "number" },
+        "badges": { "type": "array" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "playerId", "inGameName", "wins", "matches", "mvpCount", "eliminations", "arenaPoints", "weeklyPoints", "monthlyPoints", "updatedAt"]
+    },
+    "NotificationItem": {
+      "title": "NotificationItem",
+      "description": "In-app and push notification record.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "targetUid": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "type": { "type": "string", "enum": ["tournament", "match_reminder", "registration", "announcement", "wallet", "friend", "chat", "support", "report"] },
+        "title": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "body": { "type": "string", "minLength": 1, "maxLength": 500 },
+        "link": { "type": "string", "maxLength": 200 },
+        "read": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "targetUid", "type", "title", "body", "read", "createdAt"]
+    },
+    "SupportTicket": {
+      "title": "SupportTicket",
+      "description": "Player support ticket with staff replies.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "playerId": { "type": "string", "maxLength": 24 },
+        "subject": { "type": "string", "minLength": 3, "maxLength": 120 },
+        "category": { "type": "string", "maxLength": 64 },
+        "message": { "type": "string", "minLength": 5, "maxLength": 2000 },
+        "status": { "type": "string", "enum": ["open", "in_progress", "resolved"] },
+        "replies": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "uid", "playerId", "subject", "message", "status", "replies", "createdAt", "updatedAt"]
+    },
+    "AdminLog": {
+      "title": "AdminLog",
+      "description": "Append-only audit log for all admin and moderator actions.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "actorUid": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "actorRole": { "type": "string", "enum": ["owner", "moderator"] },
+        "action": { "type": "string", "minLength": 2, "maxLength": 100 },
+        "targetType": { "type": "string", "maxLength": 64 },
+        "targetId": { "type": "string", "maxLength": 128 },
+        "reason": { "type": "string", "maxLength": 500 },
+        "details": { "type": "string", "maxLength": 1000 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "actorUid", "actorRole", "action", "targetType", "targetId", "createdAt"]
+    },
+    "AppSettings": {
+      "title": "AppSettings",
+      "description": "System security feature flags, payment accounts, and background music config.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "updatedBy": { "type": "string", "maxLength": 128 },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "updatedBy", "updatedAt"]
+    },
+    "ImageDocument": {
+      "title": "ImageDocument",
+      "description": "Compressed base64 image document (<300 KB) stored directly in Firestore without external Storage.",
+      "type": "object",
+      "properties": {
+        "ownerUid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "purpose": { "type": "string", "enum": ["deposit", "avatar", "chat", "banner", "tournament", "healthcheck"] },
+        "chatId": { "type": "string", "maxLength": 260 },
+        "dataUrl": { "type": "string", "minLength": 22, "maxLength": 450000 },
+        "sizeBytes": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["ownerUid", "purpose", "dataUrl", "sizeBytes", "createdAt"]
+    },
+    "ArenaSong": {
+      "title": "ArenaSong",
+      "description": "Owner-uploaded background music metadata; raw audio bytes are stored in ordered chunks without re-encoding.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 140 },
+        "fileName": { "type": "string", "minLength": 1, "maxLength": 180 },
+        "mimeType": { "type": "string", "maxLength": 64 },
+        "sizeBytes": { "type": "number" },
+        "chunkCount": { "type": "number" },
+        "active": { "type": "boolean" },
+        "licenseConfirmed": { "type": "boolean" },
+        "revision": { "type": "number" },
+        "uploadedBy": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "title", "fileName", "mimeType", "sizeBytes", "chunkCount", "active", "licenseConfirmed", "revision", "uploadedBy", "createdAt", "updatedAt"]
+    },
+    "ArenaSongChunk": {
+      "title": "ArenaSongChunk",
+      "description": "Raw binary base64 audio slice (~450 KB) under a song document.",
+      "type": "object",
+      "properties": {
+        "songId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "index": { "type": "number" },
+        "dataBase64": { "type": "string", "minLength": 1, "maxLength": 720000 },
+        "sizeBytes": { "type": "number" }
+      },
+      "required": ["songId", "index", "dataBase64", "sizeBytes"]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": {
+      "schema": { "$ref": "#/entities/UserPublicProfile" },
+      "description": "Public player profile (no PII)."
+    },
+    "/users/{uid}/private/{docId}": {
+      "schema": { "$ref": "#/entities/UserPrivateInfo" },
+      "description": "Private PII subcollection readable only by owner and user."
+    },
+    "/admins/{uid}": {
+      "schema": { "$ref": "#/entities/AdminRecord" },
+      "description": "Owner role directory."
+    },
+    "/moderators/{uid}": {
+      "schema": { "$ref": "#/entities/ModeratorRecord" },
+      "description": "Moderator access and permissions."
+    },
+    "/tournaments/{tournamentId}": {
+      "schema": { "$ref": "#/entities/Tournament" },
+      "description": "Competitive tournaments."
+    },
+    "/roomCredentials/{tournamentId}": {
+      "schema": { "$ref": "#/entities/RoomCredential" },
+      "description": "Protected room ID and password."
+    },
+    "/registrations/{registrationId}": {
+      "schema": { "$ref": "#/entities/Registration" },
+      "description": "Player tournament registrations."
+    },
+    "/banners/{bannerId}": {
+      "schema": { "$ref": "#/entities/Banner" },
+      "description": "Admin-managed sliding banners."
+    },
+    "/walletTransactions/{txId}": {
+      "schema": { "$ref": "#/entities/WalletTransaction" },
+      "description": "Immutable coin ledger."
+    },
+    "/depositRequests/{requestId}": {
+      "schema": { "$ref": "#/entities/DepositRequest" },
+      "description": "EasyPaisa and JazzCash deposit verification requests."
+    },
+    "/withdrawalRequests/{requestId}": {
+      "schema": { "$ref": "#/entities/WithdrawalRequest" },
+      "description": "Player withdrawal requests."
+    },
+    "/friends/{friendshipId}": {
+      "schema": { "$ref": "#/entities/Friendship" },
+      "description": "Friend relationships."
+    },
+    "/messages/{chatId}": {
+      "schema": { "$ref": "#/entities/ChatThread" },
+      "description": "1-to-1 chat thread metadata."
+    },
+    "/messages/{chatId}/items/{messageId}": {
+      "schema": { "$ref": "#/entities/ChatMessage" },
+      "description": "Private 1-to-1 chat messages."
+    },
+    "/reports/{reportId}": {
+      "schema": { "$ref": "#/entities/Report" },
+      "description": "Abuse and cheating reports."
+    },
+    "/bans/{banId}": {
+      "schema": { "$ref": "#/entities/BanRecord" },
+      "description": "Append-only ban and restriction logs."
+    },
+    "/leaderboard/{uid}": {
+      "schema": { "$ref": "#/entities/LeaderboardEntry" },
+      "description": "Verified match leaderboard."
+    },
+    "/notifications/{notificationId}": {
+      "schema": { "$ref": "#/entities/NotificationItem" },
+      "description": "In-app notifications."
+    },
+    "/supportTickets/{ticketId}": {
+      "schema": { "$ref": "#/entities/SupportTicket" },
+      "description": "Player support tickets."
+    },
+    "/adminLogs/{logId}": {
+      "schema": { "$ref": "#/entities/AdminLog" },
+      "description": "Append-only admin audit logs."
+    },
+    "/appSettings/{docId}": {
+      "schema": { "$ref": "#/entities/AppSettings" },
+      "description": "Security flags, payment accounts, and background music settings."
+    },
+    "/images/{imageId}": {
+      "schema": { "$ref": "#/entities/ImageDocument" },
+      "description": "Compressed images stored in Firestore (<300 KB each) with purpose-scoped access control."
+    },
+    "/songs/{songId}": {
+      "schema": { "$ref": "#/entities/ArenaSong" },
+      "description": "Owner-managed background music metadata."
+    },
+    "/songs/{songId}/chunks/{chunkId}": {
+      "schema": { "$ref": "#/entities/ArenaSongChunk" },
+      "description": "Raw unmodified audio file chunks stored in Firestore without re-encoding."
+    }
+  }
+}
